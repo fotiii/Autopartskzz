@@ -1,5 +1,12 @@
+# dependencies
 node_modules/
+
+# build outputs (both legacy and current)
 dist/
 build/
+
+# local env / os / deploy
 .env
+.env.*
 .DS_Store
+.vercel/
