@@ -40,7 +40,7 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen flex flex-col bg-gray-50">
+      <div className="min-h-screen flex flex-col bg-gray-50 overflow-x-hidden">
         <Header cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)} />
         <main className="flex-1">
           <Routes>

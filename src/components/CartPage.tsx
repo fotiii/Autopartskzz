@@ -55,7 +55,7 @@ const CartPage: React.FC<CartPageProps> = ({ cartItems, updateQuantity, removeIt
   if (cartItems.length === 0) {
     return (
       <div className="bg-gray-50 min-h-screen py-12">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-3 sm:px-4">
           <div className="max-w-md mx-auto text-center">
             <ShoppingBag className="w-24 h-24 text-gray-400 mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Корзина пуста</h2>
@@ -73,13 +73,13 @@ const CartPage: React.FC<CartPageProps> = ({ cartItems, updateQuantity, removeIt
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen py-6">
+    <div className="bg-gray-50 min-h-screen py-4 sm:py-6">
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Корзина</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Корзина</h1>
 
         {/* Progress Steps */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-          <div className="flex items-center justify-between max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-6">
+          <div className="flex items-center justify-between gap-2 sm:gap-4 max-w-2xl mx-auto">
             <div className="flex flex-col items-center">
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold mb-2 ${
@@ -88,7 +88,7 @@ const CartPage: React.FC<CartPageProps> = ({ cartItems, updateQuantity, removeIt
               >
                 1
               </div>
-              <span className="text-sm font-medium">Контакты</span>
+              <span className="text-xs sm:text-sm font-medium">Контакты</span>
             </div>
             <div className={`flex-1 h-1 mx-4 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`} />
             <div className="flex flex-col items-center">
@@ -99,7 +99,7 @@ const CartPage: React.FC<CartPageProps> = ({ cartItems, updateQuantity, removeIt
               >
                 2
               </div>
-              <span className="text-sm font-medium">Доставка</span>
+              <span className="text-xs sm:text-sm font-medium">Доставка</span>
             </div>
             <div className={`flex-1 h-1 mx-4 ${step >= 3 ? 'bg-blue-600' : 'bg-gray-200'}`} />
             <div className="flex flex-col items-center">
@@ -110,7 +110,7 @@ const CartPage: React.FC<CartPageProps> = ({ cartItems, updateQuantity, removeIt
               >
                 3
               </div>
-              <span className="text-sm font-medium">Оплата</span>
+              <span className="text-xs sm:text-sm font-medium">Оплата</span>
             </div>
           </div>
         </div>
@@ -124,26 +124,28 @@ const CartPage: React.FC<CartPageProps> = ({ cartItems, updateQuantity, removeIt
                 {/* Cart Items */}
                 <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-200">
                   {cartItems.map((item) => (
-                    <div key={item.id} className="p-4 flex gap-4">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-24 h-24 object-cover rounded-lg"
-                      />
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
-                        <div className="text-sm text-gray-600 mb-2">{item.brand}</div>
-                        <div className="text-lg font-bold text-gray-900">
-                          {item.price.toLocaleString('ru-RU')} ₸
+                    <div key={item.id} className="p-4">
+                      <div className="flex gap-3 sm:gap-4">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 mb-1 text-base sm:text-lg line-clamp-2">{item.name}</h3>
+                          <div className="text-sm text-gray-600 mb-2">{item.brand}</div>
+                          <div className="text-lg font-bold text-gray-900">
+                            {item.price.toLocaleString('ru-RU')} ₸
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
                         <button
                           onClick={() => removeItem(item.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="self-start p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-5 h-5" />
                         </button>
+                      </div>
+                      <div className="mt-3 flex justify-end">
                         <div className="flex items-center border border-gray-300 rounded-lg">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -344,7 +346,7 @@ const CartPage: React.FC<CartPageProps> = ({ cartItems, updateQuantity, removeIt
 
           {/* Order Summary Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-20">
+            <div className="bg-white rounded-lg border border-gray-200 p-5 sm:p-6 lg:sticky lg:top-20">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Итого</h2>
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-gray-600">
