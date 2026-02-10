@@ -8,26 +8,36 @@ interface HeaderProps {
   cartCount: number;
 }
 
+interface SearchSuggestion {
+  id: string;
+  label: string;
+  query: string;
+}
+
 const Header: React.FC<HeaderProps> = ({ cartCount }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVinModalOpen, setIsVinModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
-    }
+    if (!searchQuery.trim()) return;
+    navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
   };
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (!searchQuery.trim()) return setSuggestions([]);
+      if (!searchQuery.trim()) {
+        setSuggestions([]);
+        return;
+      }
+
       const lastVehicle = localStorage.getItem('lastVehicle');
       const vehicleKey = lastVehicle ? encodeURIComponent(lastVehicle) : '';
-      apiGet<{ suggestions: any[] }>(
+
+      apiGet<{ suggestions: SearchSuggestion[] }>(
         `/search/suggestions?q=${encodeURIComponent(searchQuery)}&vehicle=${vehicleKey}`,
       )
         .then((data) => setSuggestions(data.suggestions))
@@ -50,50 +60,51 @@ const Header: React.FC<HeaderProps> = ({ cartCount }) => {
 
   return (
     <>
-      <header className="bg-white shadow-sm sticky top-0 z-50">
+      <header className="sticky top-0 z-50 bg-white shadow-sm">
         <div className="border-b border-gray-200">
           <div className="container mx-auto px-3 sm:px-4">
-            <div className="flex items-center gap-2 sm:gap-3 py-2.5">
+            <div className="flex items-center gap-2 py-2.5 sm:gap-3">
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="p-2 hover:bg-gray-100 rounded-lg shrink-0"
+                onClick={() => setIsMenuOpen((prev) => !prev)}
+                className="shrink-0 rounded-lg p-2 hover:bg-gray-100"
+                aria-label="Открыть меню"
               >
-                <Menu className="w-5 h-5" />
+                <Menu className="h-5 w-5" />
               </button>
 
-              <Link to="/" className="flex items-center gap-1.5 sm:gap-2 min-w-0 shrink">
-                <Car className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 shrink-0" />
-                <span className="font-bold text-lg sm:text-xl truncate">
+              <Link to="/" className="min-w-0 shrink flex items-center gap-1.5 sm:gap-2">
+                <Car className="h-6 w-6 shrink-0 text-blue-600 sm:h-8 sm:w-8" />
+                <span className="truncate text-lg font-bold sm:text-xl">
                   AUTO<span className="text-blue-600">PARTS</span>.KZ
                 </span>
               </Link>
 
-              <div className="ml-auto flex items-center gap-1 sm:gap-2 shrink-0">
+              <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
                 <button
                   type="button"
                   onClick={() => setIsVinModalOpen(true)}
-                  className="sm:hidden p-2 hover:bg-gray-100 rounded-lg"
+                  className="rounded-lg p-2 hover:bg-gray-100 sm:hidden"
                   aria-label="Поиск по VIN"
                 >
-                  <Barcode className="w-5 h-5" />
+                  <Barcode className="h-5 w-5" />
                 </button>
 
                 <Link
                   to="/account"
-                  className="p-2 sm:px-4 sm:py-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="rounded-lg p-2 transition-colors hover:bg-gray-100 sm:px-4 sm:py-2"
                   aria-label="Профиль"
                 >
-                  <User className="w-5 h-5" />
+                  <User className="h-5 w-5" />
                 </Link>
 
                 <Link
                   to="/cart"
-                  className="p-2 sm:px-4 sm:py-2 hover:bg-gray-100 rounded-lg transition-colors relative"
+                  className="relative rounded-lg p-2 transition-colors hover:bg-gray-100 sm:px-4 sm:py-2"
                   aria-label="Корзина"
                 >
-                  <ShoppingCart className="w-5 h-5" />
+                  <ShoppingCart className="h-5 w-5" />
                   {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
+                    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
                       {cartCount}
                     </span>
                   )}
@@ -103,33 +114,36 @@ const Header: React.FC<HeaderProps> = ({ cartCount }) => {
 
             <form onSubmit={handleSearch} className="pb-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   value={searchQuery}
                   list="search-suggestions"
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Поиск запчастей, масел, аксессуаров..."
-                  className="w-full pl-10 pr-24 sm:pr-32 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                  className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-24 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:pr-32 sm:text-base"
                 />
+
                 <datalist id="search-suggestions">
-                  {suggestions.map((s) => (
-                    <option key={s.id} value={s.query}>
-                      {s.label}
+                  {suggestions.map((suggestion) => (
+                    <option key={suggestion.id} value={suggestion.query}>
+                      {suggestion.label}
                     </option>
                   ))}
                 </datalist>
+
                 <button
                   type="button"
                   onClick={() => setIsVinModalOpen(true)}
-                  className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-md text-sm font-medium transition-colors"
+                  className="absolute right-2 top-1/2 hidden -translate-y-1/2 items-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-gray-200 sm:flex"
                 >
-                  <Barcode className="w-4 h-4" />
+                  <Barcode className="h-4 w-4" />
                   <span>По VIN</span>
                 </button>
+
                 <button
                   type="submit"
-                  className="sm:hidden absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm"
+                  className="absolute right-2 top-1/2 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white -translate-y-1/2 sm:hidden"
                 >
                   Найти
                 </button>
@@ -141,13 +155,13 @@ const Header: React.FC<HeaderProps> = ({ cartCount }) => {
         <div className={`border-b border-gray-200 ${isMenuOpen ? 'block' : 'hidden lg:block'}`}>
           <div className="container mx-auto px-3 sm:px-4">
             <nav className="py-2">
-              <ul className="flex flex-col lg:flex-row lg:items-center gap-1 lg:gap-0">
+              <ul className="flex flex-col gap-1 lg:flex-row lg:items-center lg:gap-0">
                 {categories.map((category) => (
                   <li key={category.name}>
                     <Link
                       to={category.path}
-                      className="flex items-center gap-2 px-3 sm:px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors text-sm"
                       onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-gray-100 sm:px-4"
                     >
                       <span>{category.icon}</span>
                       <span>{category.name}</span>
