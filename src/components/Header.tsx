@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, ShoppingCart, User, Menu, Barcode, Car } from 'lucide-react';
 import VinSearchModal from './VinSearchModal';
+import { apiGet } from '../api';
 
 interface HeaderProps {
   cartCount: number;
@@ -11,6 +12,7 @@ const Header: React.FC<HeaderProps> = ({ cartCount }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVinModalOpen, setIsVinModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -19,6 +21,19 @@ const Header: React.FC<HeaderProps> = ({ cartCount }) => {
       navigate(`/catalog?search=${encodeURIComponent(searchQuery)}`);
     }
   };
+
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!searchQuery.trim()) return setSuggestions([]);
+      const lastVehicle = localStorage.getItem('lastVehicle');
+      const vehicleKey = lastVehicle ? encodeURIComponent(lastVehicle) : '';
+      apiGet<{ suggestions: any[] }>(`/search/suggestions?q=${encodeURIComponent(searchQuery)}&vehicle=${vehicleKey}`)
+        .then((data) => setSuggestions(data.suggestions))
+        .catch(() => setSuggestions([]));
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const categories = [
     { name: 'Двигатель', icon: '🔧', path: '/catalog?category=engine' },
@@ -57,10 +72,14 @@ const Header: React.FC<HeaderProps> = ({ cartCount }) => {
                   <input
                     type="text"
                     value={searchQuery}
+                    list="search-suggestions"
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Поиск запчастей, масел, аксессуаров..."
                     className="w-full pl-10 pr-32 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                  <datalist id="search-suggestions">
+                    {suggestions.map((s) => (<option key={s.id} value={s.query}>{s.label}</option>))}
+                  </datalist>
                   <button
                     type="button"
                     onClick={() => setIsVinModalOpen(true)}

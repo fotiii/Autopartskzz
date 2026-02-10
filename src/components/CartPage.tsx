@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
 import ProductCard from './ProductCard';
+import { apiPost } from '../api';
 
 interface CartPageProps {
   cartItems: any[];
@@ -24,17 +25,20 @@ const CartPage: React.FC<CartPageProps> = ({ cartItems, updateQuantity, removeIt
   });
   const [paymentMethod, setPaymentMethod] = useState('card');
 
-  const recommendedProducts = Array.from({ length: 4 }, (_, i) => ({
-    id: `rec-${i + 1}`,
-    name: `Рекомендуемый товар ${i + 1}`,
-    category: 'Аксессуары',
-    price: Math.floor(Math.random() * 10000) + 2000,
-    image: 'https://images.unsplash.com/photo-1738918903155-0601cdc65818?w=400',
-    brand: 'Bosch',
-    rating: 4.5 + Math.random() * 0.5,
-    reviews: Math.floor(Math.random() * 50) + 10,
-    inStock: true,
-  }));
+  const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
+  const [recommendationMessage, setRecommendationMessage] = useState('');
+
+  useEffect(() => {
+    apiPost<{ recommendations: any[]; message: string }>('/cart/recommendations', { items: cartItems })
+      .then((data) => {
+        setRecommendedProducts(data.recommendations);
+        setRecommendationMessage(data.message);
+      })
+      .catch(() => {
+        setRecommendedProducts([]);
+        setRecommendationMessage('');
+      });
+  }, [cartItems]);
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const delivery = deliveryInfo.type === 'courier' ? 1000 : 0;

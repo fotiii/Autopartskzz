@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { apiPost } from '../api';
 import { X, Barcode, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,18 +15,23 @@ const VinSearchModal: React.FC<VinSearchModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     const cleanVin = vinCode.trim().toUpperCase();
-    
+
     if (cleanVin.length !== 17) {
       setError('VIN-код должен содержать 17 символов');
       return;
     }
 
-    setError('');
-    navigate(`/catalog?vin=${cleanVin}`);
-    onClose();
-    setVinCode('');
+    try {
+      await apiPost('/vin/decode', { vin: cleanVin });
+      setError('');
+      navigate(`/catalog?vin=${cleanVin}`);
+      onClose();
+      setVinCode('');
+    } catch (e: any) {
+      setError(e.message || 'Не удалось проверить VIN');
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
